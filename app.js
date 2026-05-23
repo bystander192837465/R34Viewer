@@ -55,7 +55,10 @@ function renderGrid(posts, container) {
     item.className = 'grid-item';
     
     const img = document.createElement('img');
-    img.src = post.preview_url || post.file_url;
+    
+    // Better quality order: sample_url > preview_url > file_url
+    img.src = post.sample_url || post.preview_url || post.file_url;
+    
     img.loading = "lazy";
     img.alt = "hot girl";
     
