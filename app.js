@@ -406,6 +406,49 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
+// ================= HARDWARE BACK BUTTON SUPPORT =================
+let isViewerOpen = false;
+
+function openViewer(post) {
+  scrollPosition = window.scrollY;
+  posX = 0;
+  posY = 0;
+
+  viewerImage.src = post.file_url;
+  document.getElementById('viewer').classList.remove('hidden');
+  isViewerOpen = true;
+
+  // Push a new history state so back button works
+  history.pushState({ viewerOpen: true }, '', '');
+
+  viewerImage.onload = () => {
+    minScale = calculateFitScale(viewerImage);
+    scale = minScale;
+    updateImageTransform();
+  };
+
+  // ... your existing favorite button code ...
+}
+
+// Close viewer function
+function closeViewer() {
+  document.getElementById('viewer').classList.add('hidden');
+  window.scrollTo(0, scrollPosition);
+  isViewerOpen = false;
+}
+
+// Handle browser back button (including phone hardware back)
+window.addEventListener('popstate', (event) => {
+  if (isViewerOpen) {
+    closeViewer();
+    // Prevent default back navigation
+    history.pushState(null, '', '');
+  }
+});
+
+// Update the close button to also use the same function
+document.getElementById('close-viewer').onclick = closeViewer;
+
 // Init - restore last used tab
 function initTab() {
   const lastTab = loadCurrentTab();
