@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rule34 Viewer</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Rule34 Viewer 🔥</h1>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="search">Search Hotness</button>
+      <button class="tab-btn" data-tab="favs">My Favorites 💕</button>
+    </div>
+  </header>
+
+    <!-- Search Tab -->
+  <div id="search-tab" class="tab-content active">
+    <div class="search-container">
+      <div class="autocomplete-wrapper">
+        <input type="text" id="search-input" placeholder="Search tags... (lesbian, big_breasts...)">
+        <div id="autocomplete" class="autocomplete"></div>
+      </div>
+      <div class="favorite-tags-section">
+        <div id="favorite-tags" class="favorite-tags"></div>
+      </div>
+      <div id="selected-tags" class="selected-tags"></div>
+    </div>
+    <div id="grid" class="masonry-grid"></div>
+    <button id="load-more">Load More Sluts</button>
+  </div>
+
+  <!-- Favorites Tab -->
+  <div id="favs-tab" class="tab-content">
+    <div id="favs-grid" class="masonry-grid"></div>
+    <p id="no-favs" style="text-align:center; padding:40px; color:#ff99cc; display:none;">
+      No favorites yet~<br>Add some hot girls first ❤️
+    </p>
+  </div>
+
+    <!-- Viewer -->
+  <div id="viewer" class="viewer hidden">
+    <button id="close-viewer">← Back</button>
+    <div class="viewer-image-container">
+      <img id="viewer-image" alt="hot naked girl" draggable="false">
+    </div>
+    <div class="viewer-controls">
+      <button id="toggle-fav">❤️ Add to Favorites</button>
+    </div>
+  </div>
+
+  <button id="back-to-top" class="back-to-top">↑</button>
+
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js');
+      });
+    }
+  </script>
+</body>
+</html>
