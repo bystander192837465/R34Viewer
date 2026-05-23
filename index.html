@@ -56,9 +56,17 @@
   <script src="app.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js');
-      });
+        const basePath = '/R34Viewer/';
+
+        window.addEventListener('load', () => {
+        navigator.serviceWorker.register(basePath + 'sw.js')
+            .then(reg => {
+            console.log('✅ Service Worker registered!', reg.scope);
+            })
+            .catch(err => {
+            console.error('❌ Service Worker failed:', err);
+            });
+        });
     }
   </script>
 </body>
