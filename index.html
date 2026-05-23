@@ -60,12 +60,8 @@
 
         window.addEventListener('load', () => {
         navigator.serviceWorker.register(basePath + 'sw.js')
-            .then(reg => {
-            console.log('✅ Service Worker registered!', reg.scope);
-            })
-            .catch(err => {
-            console.error('❌ Service Worker failed:', err);
-            });
+            .then(reg => console.log('✅ SW registered!', reg.scope))
+            .catch(err => console.error('❌ SW registration failed:', err));
         });
     }
   </script>
