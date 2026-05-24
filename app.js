@@ -1,3 +1,5 @@
+const APP_VERSION = '1.0.6';
+
 const USER_ID = "6278658";
 const API_KEY = "6e11c73ba247ea2116196d4746f6173af0c36cf8eb40a88d02f255ffc49cb7b879f36f988679ad6082dc3d310b9409f5f9f2741d3c37999dbd6c0a156ef9e515";
 
@@ -464,6 +466,66 @@ document.getElementById('clear-cache-btn').addEventListener('click', () => {
         window.location.reload(true);
       });
   });
+});
+
+// ================= IMPROVED UPDATE DETECTION =================
+const UPDATE_BTN_ID = 'smart-update-btn';
+
+function checkForUpdates() {
+  fetch('/R34Viewer/version.txt', { 
+    cache: 'no-store',
+    headers: { 'Pragma': 'no-cache' }
+  })
+    .then(res => res.text())
+    .then(rawVersion => {
+      const latestVersion = rawVersion.trim();
+
+      console.log(`Current version: ${APP_VERSION} | Latest: ${latestVersion}`);
+      
+      if (latestVersion !== APP_VERSION) {
+        showUpdateButton();
+      } else {
+        // Remove button if version is now up to date
+        const existingBtn = document.getElementById(UPDATE_BTN_ID);
+        if (existingBtn) existingBtn.remove();
+      }
+    })
+    .catch(() => {});
+}
+
+function showUpdateButton() {
+  if (document.getElementById(UPDATE_BTN_ID)) return;
+
+  const btn = document.createElement('button');
+  btn.id = UPDATE_BTN_ID;
+  btn.innerHTML = '🔄 New Update Available';
+  btn.style.cssText = `
+    position: fixed; top: 12px; right: 12px; z-index: 9999;
+    background: #ff1493; color: white; border: none; padding: 10px 18px;
+    border-radius: 25px; font-weight: bold; box-shadow: 0 4px 15px rgba(255,20,147,0.5);
+  `;
+
+  btn.onclick = () => {
+    if (confirm('Reload to apply new update?')) {
+      // Force clear cache + reload
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(regs => {
+          regs.forEach(reg => reg.unregister());
+        });
+      }
+      caches.keys().then(names => {
+        Promise.all(names.map(name => caches.delete(name)))
+          .then(() => window.location.reload(true));
+      });
+    }
+  };
+
+  document.body.appendChild(btn);
+}
+
+// Check for updates
+window.addEventListener('load', () => {
+  setTimeout(checkForUpdates, 1500);
 });
 
 // Init - restore last used tab

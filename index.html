@@ -53,7 +53,7 @@
 
   <button id="back-to-top" class="back-to-top">↑</button>
 
-  <button id="clear-cache-btn" style="position: fixed; bottom: 70px; right: 20px; z-index: 9999; 
+  <button id="clear-cache-btn" style="display: none; position: fixed; bottom: 70px; right: 20px; z-index: 9999; 
          padding: 10px 16px; background: #ff1493; color: white; border: none; 
          border-radius: 30px; font-size: 0.9rem; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
   🗑️ Clear Cache & Reload
@@ -61,15 +61,22 @@
 
   <script src="app.js"></script>
   <script>
-    if ('serviceWorker' in navigator) {
-        const basePath = '/R34Viewer/';
+  if ('serviceWorker' in navigator) {
+    const basePath = '/R34Viewer/';
 
-        window.addEventListener('load', () => {
-        navigator.serviceWorker.register(basePath + 'sw.js')
-            .then(reg => console.log('✅ SW registered!', reg.scope))
-            .catch(err => console.error('❌ SW registration failed:', err));
-        });
-    }
-  </script>
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register(basePath + 'sw.js')
+        .then(reg => {
+          console.log('✅ Service Worker registered');
+          
+          // Force check for updates
+          if (reg.waiting) {
+            reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+          }
+        })
+        .catch(err => console.error('❌ SW failed:', err));
+    });
+  }
+</script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rule34-lesbian-v4';
+const CACHE_NAME = 'rule34-lesbian-v5';   // ← Increase this number every time you update
 
 const BASE_PATH = '/R34Viewer/';
 
@@ -16,19 +16,24 @@ self.addEventListener('install', event => {
   );
 });
 
-// Delete old caches when a new version is installed
+// IMPORTANT: Take control immediately when a new SW is installed
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    Promise.all([
+      // Delete old caches
+      caches.keys().then(cacheNames => {
+        return Promise.all(
+          cacheNames.map(name => {
+            if (name !== CACHE_NAME) {
+              console.log('🗑️ Deleting old cache:', name);
+              return caches.delete(name);
+            }
+          })
+        );
+      }),
+      // Force new service worker to control all clients immediately
+      self.clients.claim()
+    ])
   );
 });
 
