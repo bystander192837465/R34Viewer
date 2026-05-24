@@ -1,4 +1,4 @@
-const APP_VERSION = '1.0.6';
+const APP_VERSION = '1.0.7';
 
 const USER_ID = "6278658";
 const API_KEY = "6e11c73ba247ea2116196d4746f6173af0c36cf8eb40a88d02f255ffc49cb7b879f36f988679ad6082dc3d310b9409f5f9f2741d3c37999dbd6c0a156ef9e515";
@@ -218,59 +218,6 @@ function calculateFitScale(imgElement) {
   );
 }
 
-// Open Viewer
-function openViewer(post) {
-  scrollPosition = window.scrollY;
-  posX = 0;
-  posY = 0;
-
-  viewerImage.src = post.file_url;
-  document.getElementById('viewer').classList.remove('hidden');
-
-  viewerImage.onload = () => {
-    minScale = calculateFitScale(viewerImage);
-    scale = minScale;
-    updateImageTransform();
-  };
-
-  // === FAVORITE BUTTON WITH LIVE UPDATE ===
-  const favBtn = document.getElementById('toggle-fav');
-  
-  const updateFavButton = () => {
-    const isFavorited = favorites.some(f => f.id === post.id);
-    if (isFavorited) {
-      favBtn.textContent = "❤️ Remove from Favorites";
-      favBtn.style.background = "#c026d3";
-    } else {
-      favBtn.textContent = "❤️ Add to Favorites";
-      favBtn.style.background = "#ff1493";
-    }
-  };
-
-  updateFavButton();
-
-  favBtn.onclick = () => {
-    const exists = favorites.some(f => f.id === post.id);
-    
-    if (exists) {
-      // Remove
-      favorites = favorites.filter(f => f.id !== post.id);
-    } else {
-      // Add
-      favorites.push(post);
-    }
-    
-    localStorage.setItem('r34Favs', JSON.stringify(favorites));
-    updateFavButton();
-
-    // 🔥 LIVE UPDATE: Refresh favorites grid if the tab is currently open
-    const favsTab = document.getElementById('favs-tab');
-    if (favsTab.classList.contains('active')) {
-      renderFavorites();
-    }
-  };
-}
-
 // ================= MOUSE DRAG =================
 imageContainer.addEventListener('mousedown', (e) => {
   if (scale <= minScale + 0.05) return;
@@ -408,19 +355,21 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
-// ================= HARDWARE BACK BUTTON SUPPORT =================
 let isViewerOpen = false;
-
+// Open Viewer - Fixed & Clean Favorites
 function openViewer(post) {
   scrollPosition = window.scrollY;
   posX = 0;
   posY = 0;
 
+  const viewer = document.getElementById('viewer');
+  const viewerImage = document.getElementById('viewer-image');
+  const favBtn = document.getElementById('toggle-fav');
+
   viewerImage.src = post.file_url;
-  document.getElementById('viewer').classList.remove('hidden');
+  viewer.classList.remove('hidden');
   isViewerOpen = true;
 
-  // Push a new history state so back button works
   history.pushState({ viewerOpen: true }, '', '');
 
   viewerImage.onload = () => {
@@ -429,7 +378,38 @@ function openViewer(post) {
     updateImageTransform();
   };
 
-  // ... your existing favorite button code ...
+  // === FAVORITES LOGIC ===
+  const updateFavButton = () => {
+    const isFavorited = favorites.some(f => f.id === post.id);
+    if (isFavorited) {
+      favBtn.textContent = "❤️ Remove from Favorites";
+      favBtn.style.backgroundColor = "#c026d3";
+    } else {
+      favBtn.textContent = "❤️ Add to Favorites";
+      favBtn.style.backgroundColor = "#ff1493";
+    }
+  };
+
+  updateFavButton();
+
+  // Clean click handler
+  favBtn.onclick = () => {
+    const exists = favorites.some(f => f.id === post.id);
+
+    if (exists) {
+      favorites = favorites.filter(f => f.id !== post.id);
+    } else {
+      favorites.push(post);
+      localStorage.setItem('r34Favs', JSON.stringify(favorites));
+    }
+
+    updateFavButton();           // ← This should now update the UI
+
+    // Live update favorites tab if open
+    if (document.getElementById('favs-tab').classList.contains('active')) {
+      renderFavorites();
+    }
+  };
 }
 
 // Close viewer function
@@ -506,18 +486,16 @@ function showUpdateButton() {
   `;
 
   btn.onclick = () => {
-    if (confirm('Reload to apply new update?')) {
-      // Force clear cache + reload
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(regs => {
-          regs.forEach(reg => reg.unregister());
-        });
-      }
-      caches.keys().then(names => {
-        Promise.all(names.map(name => caches.delete(name)))
-          .then(() => window.location.reload(true));
+    // Force clear cache + reload
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        regs.forEach(reg => reg.unregister());
       });
     }
+    caches.keys().then(names => {
+      Promise.all(names.map(name => caches.delete(name)))
+        .then(() => window.location.reload(true));
+    });
   };
 
   document.body.appendChild(btn);
