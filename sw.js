@@ -1,4 +1,5 @@
-const CACHE_NAME = 'rule34-lesbian-v3';
+const CACHE_NAME = 'rule34-lesbian-v4';
+
 const BASE_PATH = '/R34Viewer/';
 
 const urlsToCache = [
@@ -11,27 +12,29 @@ const urlsToCache = [
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Caching files...');
-        return cache.addAll(urlsToCache);
-      })
-      .catch(err => {
-        console.warn('Some files failed to cache (this is normal on first install)', err);
-      })
+    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+  );
+});
+
+// Delete old caches when a new version is installed
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheName !== CACHE_NAME) {
+            console.log('Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
   );
 });
 
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
-      .then(response => {
-        // Return cached version or fetch from network
-        return response || fetch(event.request);
-      })
-      .catch(() => {
-        // Fallback if offline and no cache
-        return caches.match(BASE_PATH + 'index.html');
-      })
+      .then(response => response || fetch(event.request))
   );
 });

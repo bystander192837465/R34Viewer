@@ -449,6 +449,23 @@ window.addEventListener('popstate', (event) => {
 // Update the close button to also use the same function
 document.getElementById('close-viewer').onclick = closeViewer;
 
+// ================= DEBUG: CLEAR CACHE BUTTON =================
+document.getElementById('clear-cache-btn').addEventListener('click', () => {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+      registrations.forEach(reg => reg.unregister());
+    });
+  }
+
+  caches.keys().then(cacheNames => {
+    Promise.all(cacheNames.map(name => caches.delete(name)))
+      .then(() => {
+        alert("✅ Cache cleared! Reloading...");
+        window.location.reload(true);
+      });
+  });
+});
+
 // Init - restore last used tab
 function initTab() {
   const lastTab = loadCurrentTab();
